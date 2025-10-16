@@ -1,0 +1,47 @@
+# Upptime configuration for esl-ui.com monitoring
+owner: dshovchko
+repo: test-upptime
+
+sites:
+  - name: ESL UI Main Site
+    url: https://esl-ui.com/
+
+  - name: ESL UI CSS Bundle
+    url: https://esl-ui.com/bundles/site.css
+
+  - name: ESL UI JS Bundle
+    url: https://esl-ui.com/bundles/site.js
+
+# Disable status website, keep only Issues
+# status-website:
+#   Status website disabled
+
+# Workflow schedule configuration
+workflowSchedule:
+  uptime: "*/5 * * * *" # every 5 minutes
+  # Disable static site generation
+  # graphs: "0 0 * * *"
+  # responseTime: "0 23 * * *"
+  # staticSite: "0 1 * * *"
+  # summary: "0 0 * * *"
+  # updateTemplate: "0 0 * * *"
+  # updates: "0 3 * * *"
+
+# Configuration for SSL and domain
+user-agent: upptime
+skipDescriptionUpdate: true
+skipTopicsUpdate: true
+skipHomepageUpdate: true
+
+# Issues configuration for notifications
+issueLabels:
+  - "upptime"
+  - "monitoring"
+
+# Status change notifications
+commitMessages:
+  statusChange: "$EMOJI $SITE_NAME is $STATUS ($RESPONSE_CODE in $RESPONSE_TIME ms) [skip ci] [upptime]"
+
+# Automatically close Issues when site is back up
+autoAssignIssues: true
+autoCloseDownIssues: true
