@@ -140,6 +140,11 @@ jobs:
             fi
           else
             echo "Could not determine domain expiry date"
+            overall_status=2
+            create_or_update_issue "domain" \
+              "❌ Domain Expiry Parse Failure: esl-ui.com" \
+              "Could not determine the domain expiry date for **esl-ui.com**.\n\nThis may indicate a change in whois output format, a monitoring failure, or a domain issue.\n\nPlease investigate.\n\n*Updated: $(date)*" \
+              "Domain Expiry Parse Failure"
           fi
           
           # Exit with aggregated status

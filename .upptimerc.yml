@@ -37,6 +37,9 @@ skipHomepageUpdate: true
 issueLabels:
   - "upptime"
   - "monitoring"
+  - "urgent"
+  - "ssl"
+  - "domain"
 
 # Status change notifications
 commitMessages:
