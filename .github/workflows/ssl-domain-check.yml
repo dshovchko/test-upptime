@@ -83,17 +83,10 @@ jobs:
             echo "$ssl_info"
             echo "Parsed expiry_date: '$expiry_date'"
             overall_status=2
+            body=$(printf "Could not parse SSL certificate expiry date for esl-ui.com.\n\nRaw openssl output:\n\`\`\`\n%s\n\`\`\`\nParsed expiry_date: '%s'\n\n*Updated: %s*" "$ssl_info" "$expiry_date" "$(date)")
             create_or_update_issue "ssl" \
               "❌ SSL Certificate Parse Failure: esl-ui.com" \
-              "Could not parse SSL certificate expiry date for esl-ui.com.
-
-Raw openssl output:
-\`\`\`
-$ssl_info
-\`\`\`
-Parsed expiry_date: '$expiry_date'
-
-*Updated: $(date)*" \
+              "$body" \
               "SSL Certificate Parse Failure"
           else
             days_until_expiry=$(( (expiry_timestamp - current_timestamp) / 86400 ))
@@ -103,13 +96,10 @@ Parsed expiry_date: '$expiry_date'
             if [ $days_until_expiry -lt 130 ]; then
               echo "⚠️ SSL certificate expires in $days_until_expiry days!"
 
+              body=$(printf "SSL certificate for esl-ui.com expires in **%s days** (on %s).\n\nPlease renew the certificate before expiration.\n\n*Updated: %s*" "$days_until_expiry" "$expiry_date" "$(date)")
               create_or_update_issue "ssl" \
                 "⚠️ SSL Certificate Expiring Soon: esl-ui.com" \
-                "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).
-
-Please renew the certificate before expiration.
-
-*Updated: $(date)*" \
+                "$body" \
                 "SSL Certificate Expiring Soon"
 
               overall_status=1
@@ -152,13 +142,10 @@ Please renew the certificate before expiration.
               if [ $days_until_expiry -lt 460 ]; then
                 echo "⚠️ Domain expires in $days_until_expiry days!"
 
+                body=$(printf "Domain esl-ui.com expires in **%s days** (on %s).\n\nPlease renew the domain before expiration.\n\n*Updated: %s*" "$days_until_expiry" "$expiry_date" "$(date)")
                 create_or_update_issue "domain" \
                   "⚠️ Domain Expiring Soon: esl-ui.com" \
-                  "Domain esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).
-
-Please renew the domain before expiration.
-
-*Updated: $(date)*" \
+                  "$body" \
                   "Domain Expiring Soon"
 
                 overall_status=1
@@ -173,31 +160,19 @@ Please renew the domain before expiration.
               echo "❌ Error: Could not parse domain expiry date timestamp."
               echo "Parsed expiry_date: '$expiry_date'"
               overall_status=2
+              body=$(printf "Could not parse the domain expiry date timestamp for **esl-ui.com**.\n\nParsed expiry_date: '%s'\n\nThis may indicate an unexpected date format.\n\nPlease investigate.\n\n*Updated: %s*" "$expiry_date" "$(date)")
               create_or_update_issue "domain" \
                 "❌ Domain Expiry Parse Failure: esl-ui.com" \
-                "Could not parse the domain expiry date timestamp for **esl-ui.com**.
-
-Parsed expiry_date: '$expiry_date'
-
-This may indicate an unexpected date format.
-
-Please investigate.
-
-*Updated: $(date)*" \
+                "$body" \
                 "Domain Expiry Parse Failure"
             fi
           else
             echo "Could not determine domain expiry date"
             overall_status=2
+            body=$(printf "Could not determine the domain expiry date for **esl-ui.com**.\n\nThis may indicate a change in whois output format, a monitoring failure, or a domain issue.\n\nPlease investigate.\n\n*Updated: %s*" "$(date)")
             create_or_update_issue "domain" \
               "❌ Domain Expiry Parse Failure: esl-ui.com" \
-              "Could not determine the domain expiry date for **esl-ui.com**.
-
-This may indicate a change in whois output format, a monitoring failure, or a domain issue.
-
-Please investigate.
-
-*Updated: $(date)*" \
+              "$body" \
               "Domain Expiry Parse Failure"
           fi
 
