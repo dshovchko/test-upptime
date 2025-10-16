@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Install whois
+        run: sudo apt-get update && sudo apt-get install -y whois
+      
       - name: Check SSL Certificate and Domain
         run: |
           set -uo pipefail
