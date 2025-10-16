@@ -18,6 +18,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Check SSL Certificate and Domain
         run: |
+          set -uo pipefail
+          
           # Define reusable functions
           create_or_update_issue() {
             local label="$1"

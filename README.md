@@ -19,7 +19,8 @@ Uptime monitoring for esl-ui.com resources.
 1. Fork this repository
 2. Update `owner` in `.upptimerc.yml` to your GitHub username
 3. Enable GitHub Actions in repository settings
-4. Enable GitHub Pages to display status page
+
+Monitoring will create GitHub Issues when problems are detected. No additional setup required.
 
 ## Notifications
 
