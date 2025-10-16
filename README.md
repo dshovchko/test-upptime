@@ -18,9 +18,19 @@ Uptime monitoring for esl-ui.com resources.
 
 1. Fork this repository
 2. Update `owner` in `.upptimerc.yml` to your GitHub username
-3. Enable GitHub Actions in repository settings
+3. Enable GitHub Actions in repository settings:
+   - Go to **Settings** → **Actions** → **General**
+   - Set Workflow permissions to **"Read and write permissions"**
+   - Click **Save**
 
 Monitoring will create GitHub Issues when problems are detected. No additional setup required.
+
+## How it works
+
+Upptime will automatically create workflows and start monitoring after the first push. You'll see:
+- Issues created when sites are down or certificates/domains are expiring
+- Issues automatically closed when problems are resolved
+- Monitoring runs every 5 minutes for availability, daily for SSL/domain
 
 ## Notifications
 
