@@ -23,7 +23,7 @@ Uptime monitoring for esl-ui.com resources.
 
 ## Notifications
 
-To configure notifications, add to `.upptimerc.yml`:
+Notifications are optional and not enabled by default. To enable notifications, add the following to `.upptimerc.yml`:
 
 ```yaml
 notifications:
