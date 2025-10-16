@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Check SSL Certificate
+      - name: Check SSL Certificate and Domain
         run: |
           # Define reusable functions
           create_or_update_issue() {
@@ -48,6 +48,10 @@ jobs:
             fi
           }
           
+          # Track overall status
+          overall_status=0
+          
+          # Check SSL Certificate
           echo "Checking SSL certificate for esl-ui.com..."
           
           # Check SSL certificate
@@ -66,32 +70,33 @@ jobs:
             echo "Raw openssl output:"
             echo "$ssl_info"
             echo "Parsed expiry_date: '$expiry_date'"
-            exit 2
-          fi
-          
-          days_until_expiry=$(( (expiry_timestamp - current_timestamp) / 86400 ))
-          
-          echo "Days until SSL expiry: $days_until_expiry"
-          
-          if [ $days_until_expiry -lt 30 ]; then
-            echo "⚠️ SSL certificate expires in $days_until_expiry days!"
-            
-            create_or_update_issue "ssl" \
-              "⚠️ SSL Certificate Expiring Soon: esl-ui.com" \
-              "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the certificate before expiration.\n\n*Updated: $(date)*" \
-              "SSL Certificate Expiring Soon"
-            
-            exit 1
+            overall_status=2
           else
-            echo "✅ SSL certificate is valid for $days_until_expiry more days"
+            days_until_expiry=$(( (expiry_timestamp - current_timestamp) / 86400 ))
             
-            close_issue_if_exists "ssl" \
-              "SSL Certificate Expiring Soon" \
-              "✅ SSL certificate is now valid for $days_until_expiry more days. Issue resolved."
+            echo "Days until SSL expiry: $days_until_expiry"
+            
+            if [ $days_until_expiry -lt 30 ]; then
+              echo "⚠️ SSL certificate expires in $days_until_expiry days!"
+              
+              create_or_update_issue "ssl" \
+                "⚠️ SSL Certificate Expiring Soon: esl-ui.com" \
+                "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the certificate before expiration.\n\n*Updated: $(date)*" \
+                "SSL Certificate Expiring Soon"
+              
+              overall_status=1
+            else
+              echo "✅ SSL certificate is valid for $days_until_expiry more days"
+              
+              close_issue_if_exists "ssl" \
+                "SSL Certificate Expiring Soon" \
+                "✅ SSL certificate is now valid for $days_until_expiry more days. Issue resolved."
+            fi
           fi
 
-      - name: Check Domain Expiry
-        run: |
+          
+          # Check Domain Expiry
+          echo ""
           echo "Checking domain expiry for esl-ui.com..."
           
           # Run whois once and reuse output
@@ -124,7 +129,7 @@ jobs:
                   "Domain esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the domain before expiration.\n\n*Updated: $(date)*" \
                   "Domain Expiring Soon"
                 
-                exit 1
+                overall_status=1
               else
                 echo "✅ Domain is valid for $days_until_expiry more days"
                 
@@ -136,3 +141,6 @@ jobs:
           else
             echo "Could not determine domain expiry date"
           fi
+          
+          # Exit with aggregated status
+          exit $overall_status
