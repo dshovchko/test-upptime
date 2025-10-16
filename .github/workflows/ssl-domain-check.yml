@@ -18,6 +18,36 @@ jobs:
         uses: actions/checkout@v4
       - name: Check SSL Certificate
         run: |
+          # Define reusable functions
+          create_or_update_issue() {
+            local label="$1"
+            local title="$2"
+            local body="$3"
+            local search_term="$4"
+            
+            existing_issue=$(gh issue list --label "$label" --state "open" --search "$search_term" --json number --jq '.[0].number' || echo "")
+            
+            if [ -z "$existing_issue" ]; then
+              echo "Creating new $label issue..."
+              gh issue create --title "$title" --body "$body" --label "$label" --label monitoring --label urgent
+            else
+              echo "$label issue already exists (#$existing_issue), updating..."
+              gh issue edit "$existing_issue" --body "$body"
+            fi
+          }
+          
+          close_issue_if_exists() {
+            local label="$1"
+            local search_term="$2"
+            local comment="$3"
+            
+            existing_issue=$(gh issue list --label "$label" --state "open" --search "$search_term" --json number --jq '.[0].number' || echo "")
+            if [ -n "$existing_issue" ]; then
+              echo "Closing resolved $label issue #$existing_issue"
+              gh issue close "$existing_issue" --comment "$comment"
+            fi
+          }
+          
           echo "Checking SSL certificate for esl-ui.com..."
           
           # Check SSL certificate
@@ -27,8 +57,18 @@ jobs:
           
           # Get expiry date
           expiry_date=$(echo "$ssl_info" | grep "notAfter" | cut -d= -f2)
-          expiry_timestamp=$(date -d "$expiry_date" +%s)
+          expiry_timestamp=$(date -d "$expiry_date" +%s 2>/dev/null)
           current_timestamp=$(date +%s)
+          
+          # Check if expiry_timestamp is a valid integer
+          if ! [[ "$expiry_timestamp" =~ ^[0-9]+$ ]]; then
+            echo "❌ Error: Could not parse SSL certificate expiry date for esl-ui.com."
+            echo "Raw openssl output:"
+            echo "$ssl_info"
+            echo "Parsed expiry_date: '$expiry_date'"
+            exit 2
+          fi
+          
           days_until_expiry=$(( (expiry_timestamp - current_timestamp) / 86400 ))
           
           echo "Days until SSL expiry: $days_until_expiry"
@@ -36,51 +76,41 @@ jobs:
           if [ $days_until_expiry -lt 30 ]; then
             echo "⚠️ SSL certificate expires in $days_until_expiry days!"
             
-            # Check if SSL issue already exists
-            existing_ssl_issue=$(gh issue list --label "ssl" --state "open" --search "SSL Certificate Expiring Soon" --json number --jq '.[0].number' || echo "")
-            
-            if [ -z "$existing_ssl_issue" ]; then
-              echo "Creating new SSL issue..."
-              gh issue create \
-                --title "⚠️ SSL Certificate Expiring Soon: esl-ui.com" \
-                --body "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the certificate before expiration." \
-                --label "ssl,monitoring,urgent"
-            else
-              echo "SSL issue already exists (#$existing_ssl_issue), updating..."
-              gh issue edit "$existing_ssl_issue" \
-                --body "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the certificate before expiration.\n\n*Updated: $(date)*"
-            fi
+            create_or_update_issue "ssl" \
+              "⚠️ SSL Certificate Expiring Soon: esl-ui.com" \
+              "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the certificate before expiration.\n\n*Updated: $(date)*" \
+              "SSL Certificate Expiring Soon"
             
             exit 1
           else
             echo "✅ SSL certificate is valid for $days_until_expiry more days"
             
-            # Close existing SSL issues if certificate is valid
-            existing_ssl_issue=$(gh issue list --label "ssl" --state "open" --search "SSL Certificate Expiring Soon" --json number --jq '.[0].number' || echo "")
-            if [ -n "$existing_ssl_issue" ]; then
-              echo "Closing resolved SSL issue #$existing_ssl_issue"
-              gh issue close "$existing_ssl_issue" --comment "✅ SSL certificate is now valid for $days_until_expiry more days. Issue resolved."
-            fi
+            close_issue_if_exists "ssl" \
+              "SSL Certificate Expiring Soon" \
+              "✅ SSL certificate is now valid for $days_until_expiry more days. Issue resolved."
           fi
 
       - name: Check Domain Expiry
         run: |
           echo "Checking domain expiry for esl-ui.com..."
           
-          # Check domain via whois
-          domain_info=$(whois esl-ui.com | grep -i "expir")
+          # Run whois once and reuse output
+          full_whois=$(whois esl-ui.com)
+          domain_info=$(echo "$full_whois" | grep -i "expir")
           echo "Domain expiry info:"
           echo "$domain_info"
           
           # Try to get domain expiry date
-          expiry_line=$(whois esl-ui.com | grep -i "registry expiry date" | head -1)
+          expiry_line=$(echo "$full_whois" | grep -i "registry expiry date" | head -1)
           if [ -n "$expiry_line" ]; then
             expiry_date=$(echo "$expiry_line" | cut -d: -f2- | xargs)
             echo "Domain expires: $expiry_date"
             
             # Convert to timestamp (may need adaptation depending on format)
-            expiry_timestamp=$(date -d "$expiry_date" +%s 2>/dev/null || echo "0")
-            if [ "$expiry_timestamp" != "0" ]; then
+            expiry_timestamp=$(date -d "$expiry_date" +%s 2>/dev/null)
+            
+            # Check if expiry_timestamp is a valid integer
+            if [[ "$expiry_timestamp" =~ ^[0-9]+$ ]]; then
               current_timestamp=$(date +%s)
               days_until_expiry=$(( (expiry_timestamp - current_timestamp) / 86400 ))
               
@@ -89,31 +119,18 @@ jobs:
               if [ $days_until_expiry -lt 60 ]; then
                 echo "⚠️ Domain expires in $days_until_expiry days!"
                 
-                # Check if domain issue already exists
-                existing_domain_issue=$(gh issue list --label "domain" --state "open" --search "Domain Expiring Soon" --json number --jq '.[0].number' || echo "")
-                
-                if [ -z "$existing_domain_issue" ]; then
-                  echo "Creating new domain issue..."
-                  gh issue create \
-                    --title "⚠️ Domain Expiring Soon: esl-ui.com" \
-                    --body "Domain esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the domain before expiration." \
-                    --label "domain,monitoring,urgent"
-                else
-                  echo "Domain issue already exists (#$existing_domain_issue), updating..."
-                  gh issue edit "$existing_domain_issue" \
-                    --body "Domain esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the domain before expiration.\n\n*Updated: $(date)*"
-                fi
+                create_or_update_issue "domain" \
+                  "⚠️ Domain Expiring Soon: esl-ui.com" \
+                  "Domain esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the domain before expiration.\n\n*Updated: $(date)*" \
+                  "Domain Expiring Soon"
                 
                 exit 1
               else
                 echo "✅ Domain is valid for $days_until_expiry more days"
                 
-                # Close existing domain issues if domain is valid
-                existing_domain_issue=$(gh issue list --label "domain" --state "open" --search "Domain Expiring Soon" --json number --jq '.[0].number' || echo "")
-                if [ -n "$existing_domain_issue" ]; then
-                  echo "Closing resolved domain issue #$existing_domain_issue"
-                  gh issue close "$existing_domain_issue" --comment "✅ Domain is now valid for $days_until_expiry more days. Issue resolved."
-                fi
+                close_issue_if_exists "domain" \
+                  "Domain Expiring Soon" \
+                  "✅ Domain is now valid for $days_until_expiry more days. Issue resolved."
               fi
             fi
           else
