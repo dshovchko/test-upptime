@@ -85,7 +85,15 @@ jobs:
             overall_status=2
             create_or_update_issue "ssl" \
               "❌ SSL Certificate Parse Failure: esl-ui.com" \
-              "Could not parse SSL certificate expiry date for esl-ui.com.\n\nRaw openssl output:\n\`\`\`\n$ssl_info\n\`\`\`\nParsed expiry_date: '$expiry_date'\n\n*Updated: $(date)*" \
+              "Could not parse SSL certificate expiry date for esl-ui.com.
+
+Raw openssl output:
+\`\`\`
+$ssl_info
+\`\`\`
+Parsed expiry_date: '$expiry_date'
+
+*Updated: $(date)*" \
               "SSL Certificate Parse Failure"
           else
             days_until_expiry=$(( (expiry_timestamp - current_timestamp) / 86400 ))
@@ -97,7 +105,11 @@ jobs:
 
               create_or_update_issue "ssl" \
                 "⚠️ SSL Certificate Expiring Soon: esl-ui.com" \
-                "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the certificate before expiration.\n\n*Updated: $(date)*" \
+                "SSL certificate for esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).
+
+Please renew the certificate before expiration.
+
+*Updated: $(date)*" \
                 "SSL Certificate Expiring Soon"
 
               overall_status=1
@@ -142,7 +154,11 @@ jobs:
 
                 create_or_update_issue "domain" \
                   "⚠️ Domain Expiring Soon: esl-ui.com" \
-                  "Domain esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).\n\nPlease renew the domain before expiration.\n\n*Updated: $(date)*" \
+                  "Domain esl-ui.com expires in **$days_until_expiry days** (on $expiry_date).
+
+Please renew the domain before expiration.
+
+*Updated: $(date)*" \
                   "Domain Expiring Soon"
 
                 overall_status=1
@@ -159,7 +175,15 @@ jobs:
               overall_status=2
               create_or_update_issue "domain" \
                 "❌ Domain Expiry Parse Failure: esl-ui.com" \
-                "Could not parse the domain expiry date timestamp for **esl-ui.com**.\n\nParsed expiry_date: '$expiry_date'\n\nThis may indicate an unexpected date format.\n\nPlease investigate.\n\n*Updated: $(date)*" \
+                "Could not parse the domain expiry date timestamp for **esl-ui.com**.
+
+Parsed expiry_date: '$expiry_date'
+
+This may indicate an unexpected date format.
+
+Please investigate.
+
+*Updated: $(date)*" \
                 "Domain Expiry Parse Failure"
             fi
           else
@@ -167,7 +191,13 @@ jobs:
             overall_status=2
             create_or_update_issue "domain" \
               "❌ Domain Expiry Parse Failure: esl-ui.com" \
-              "Could not determine the domain expiry date for **esl-ui.com**.\n\nThis may indicate a change in whois output format, a monitoring failure, or a domain issue.\n\nPlease investigate.\n\n*Updated: $(date)*" \
+              "Could not determine the domain expiry date for **esl-ui.com**.
+
+This may indicate a change in whois output format, a monitoring failure, or a domain issue.
+
+Please investigate.
+
+*Updated: $(date)*" \
               "Domain Expiry Parse Failure"
           fi
 
