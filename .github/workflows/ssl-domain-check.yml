@@ -24,6 +24,12 @@ jobs:
         run: |
           set -uo pipefail
 
+          # Create labels if they don't exist
+          gh label create ssl --description "SSL certificate issues" --color "d73a4a" --force 2>/dev/null || true
+          gh label create domain --description "Domain expiry issues" --color "d73a4a" --force 2>/dev/null || true
+          gh label create monitoring --description "Monitoring alerts" --color "0075ca" --force 2>/dev/null || true
+          gh label create urgent --description "Urgent issues" --color "b60205" --force 2>/dev/null || true
+
           # Define reusable functions
           create_or_update_issue() {
             local label="$1"
