@@ -2,7 +2,7 @@ name: SSL and Domain Check
 
 on:
   schedule:
-    - cron: "0 12 * * *" # daily at 12:00 UTC
+    - cron: "30 * * * *" # daily at 12:00 UTC
   workflow_dispatch:
 
 jobs:
