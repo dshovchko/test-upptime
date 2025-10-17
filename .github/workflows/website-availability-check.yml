@@ -26,7 +26,7 @@ jobs:
             "https://esl-ui.com/"
             "https://esl-ui.com/bundles/site.js"
             "https://esl-ui.com/bundles/site.css"
-            "https://esl-ui.com/bundles/site.nonexistent.file"
+            "https://esl-ui.com/bundles/site."
           )
           SITE_NAME="esl-ui.com"
           CONNECT_TIMEOUT=5  # seconds to wait for connection
