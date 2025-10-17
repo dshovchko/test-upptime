@@ -23,7 +23,7 @@ Automated monitoring system for esl-ui.com infrastructure using GitHub Actions.
 
 ### Website Availability
 - **First failure** → ⚠️ Warning issue created (might be a deployment or temporary network issue)
-- **Second+ failure** → 🚨 Alert issue created (warning is closed with escalation comment, alert escalated)
+- **Second+ failure** → 🚨 Warning escalated to Alert (same issue renamed, escalation comment added, full history preserved)
 - **Recovery after warning** → Warning issue is silently closed (reason: "not planned")
 - **Recovery after alert** → Alert issue is closed with resolution comment (reason: "completed")
 
