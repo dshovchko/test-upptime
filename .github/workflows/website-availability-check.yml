@@ -183,11 +183,8 @@ jobs:
                 --body "$body"
 
               # Add escalation comment
-              gh issue comment "$warning_issue" --body "⚠️ → 🚨 **Issue escalated to ALERT**
-
-This warning has been escalated to an alert due to multiple consecutive failures detected.
-
-The issue title and description have been updated to reflect the current alert status."
+              escalation_comment=$(printf "⚠️ → 🚨 **Issue escalated to ALERT**\n\nThis warning has been escalated to an alert due to multiple consecutive failures detected.\n\nThe issue title and description have been updated to reflect the current alert status.")
+              gh issue comment "$warning_issue" --body "$escalation_comment"
 
               exit 1
             else
