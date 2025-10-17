@@ -2,7 +2,7 @@ name: SSL and Domain Check
 
 on:
   schedule:
-    - cron: "30 * * * *" # daily at 12:00 UTC
+    - cron: "0 7 * * *" # daily at 09:00 EET (07:00 UTC)
   workflow_dispatch:
 
 jobs:
@@ -23,6 +23,11 @@ jobs:
       - name: Check SSL Certificate and Domain
         run: |
           set -uo pipefail
+
+          # Configuration - change this for your domain
+          DOMAIN="esl-ui.com"
+          SSL_WARNING_DAYS=30
+          DOMAIN_WARNING_DAYS=60
 
           # Create labels if they don't exist
           gh label create ssl --description "SSL certificate issues" --color "d73a4a" --force 2>/dev/null || true
@@ -64,10 +69,10 @@ jobs:
           overall_status=0
 
           # Check SSL Certificate
-          echo "Checking SSL certificate for esl-ui.com..."
+          echo "Checking SSL certificate for $DOMAIN..."
 
           # Check SSL certificate
-          ssl_info=$(echo | openssl s_client -servername esl-ui.com -connect esl-ui.com:443 2>/dev/null | openssl x509 -noout -dates)
+          ssl_info=$(echo | openssl s_client -servername $DOMAIN -connect $DOMAIN:443 2>/dev/null | openssl x509 -noout -dates)
           echo "SSL Certificate info:"
           echo "$ssl_info"
 
@@ -78,14 +83,14 @@ jobs:
 
           # Check if expiry_timestamp is a valid integer
           if ! [[ "$expiry_timestamp" =~ ^[0-9]+$ ]]; then
-            echo "❌ Error: Could not parse SSL certificate expiry date for esl-ui.com."
+            echo "❌ Error: Could not parse SSL certificate expiry date for $DOMAIN."
             echo "Raw openssl output:"
             echo "$ssl_info"
             echo "Parsed expiry_date: '$expiry_date'"
             overall_status=2
-            body=$(printf "Could not parse SSL certificate expiry date for esl-ui.com.\n\nRaw openssl output:\n\`\`\`\n%s\n\`\`\`\nParsed expiry_date: '%s'\n\n*Updated: %s*" "$ssl_info" "$expiry_date" "$(date)")
+            body=$(printf "Could not parse SSL certificate expiry date for $DOMAIN.\n\nRaw openssl output:\n\`\`\`\n%s\n\`\`\`\nParsed expiry_date: '%s'\n\n*Updated: %s*" "$ssl_info" "$expiry_date" "$(date)")
             create_or_update_issue "ssl" \
-              "❌ SSL Certificate Parse Failure: esl-ui.com" \
+              "❌ SSL Certificate Parse Failure: $DOMAIN" \
               "$body" \
               "SSL Certificate Parse Failure"
           else
@@ -93,12 +98,12 @@ jobs:
 
             echo "Days until SSL expiry: $days_until_expiry"
 
-            if [ $days_until_expiry -lt 130 ]; then
+            if [ $days_until_expiry -lt $SSL_WARNING_DAYS ]; then
               echo "⚠️ SSL certificate expires in $days_until_expiry days!"
 
-              body=$(printf "SSL certificate for esl-ui.com expires in **%s days** (on %s).\n\nPlease renew the certificate before expiration.\n\n*Updated: %s*" "$days_until_expiry" "$expiry_date" "$(date)")
+              body=$(printf "SSL certificate for $DOMAIN expires in **%s days** (on %s).\n\nPlease renew the certificate before expiration.\n\n*Updated: %s*" "$days_until_expiry" "$expiry_date" "$(date)")
               create_or_update_issue "ssl" \
-                "⚠️ SSL Certificate Expiring Soon: esl-ui.com" \
+                "⚠️ SSL Certificate Expiring Soon: $DOMAIN" \
                 "$body" \
                 "SSL Certificate Expiring Soon"
 
@@ -115,10 +120,10 @@ jobs:
 
           # Check Domain Expiry
           echo ""
-          echo "Checking domain expiry for esl-ui.com..."
+          echo "Checking domain expiry for $DOMAIN..."
 
           # Run whois once and reuse output
-          full_whois=$(whois esl-ui.com)
+          full_whois=$(whois $DOMAIN)
           domain_info=$(echo "$full_whois" | grep -i "expir")
           echo "Domain expiry info:"
           echo "$domain_info"
@@ -139,12 +144,12 @@ jobs:
 
               echo "Days until domain expiry: $days_until_expiry"
 
-              if [ $days_until_expiry -lt 460 ]; then
+              if [ $days_until_expiry -lt $DOMAIN_WARNING_DAYS ]; then
                 echo "⚠️ Domain expires in $days_until_expiry days!"
 
-                body=$(printf "Domain esl-ui.com expires in **%s days** (on %s).\n\nPlease renew the domain before expiration.\n\n*Updated: %s*" "$days_until_expiry" "$expiry_date" "$(date)")
+                body=$(printf "Domain $DOMAIN expires in **%s days** (on %s).\n\nPlease renew the domain before expiration.\n\n*Updated: %s*" "$days_until_expiry" "$expiry_date" "$(date)")
                 create_or_update_issue "domain" \
-                  "⚠️ Domain Expiring Soon: esl-ui.com" \
+                  "⚠️ Domain Expiring Soon: $DOMAIN" \
                   "$body" \
                   "Domain Expiring Soon"
 
@@ -160,18 +165,18 @@ jobs:
               echo "❌ Error: Could not parse domain expiry date timestamp."
               echo "Parsed expiry_date: '$expiry_date'"
               overall_status=2
-              body=$(printf "Could not parse the domain expiry date timestamp for **esl-ui.com**.\n\nParsed expiry_date: '%s'\n\nThis may indicate an unexpected date format.\n\nPlease investigate.\n\n*Updated: %s*" "$expiry_date" "$(date)")
+              body=$(printf "Could not parse the domain expiry date timestamp for **$DOMAIN**.\n\nParsed expiry_date: '%s'\n\nThis may indicate an unexpected date format.\n\nPlease investigate.\n\n*Updated: %s*" "$expiry_date" "$(date)")
               create_or_update_issue "domain" \
-                "❌ Domain Expiry Parse Failure: esl-ui.com" \
+                "❌ Domain Expiry Parse Failure: $DOMAIN" \
                 "$body" \
                 "Domain Expiry Parse Failure"
             fi
           else
             echo "Could not determine domain expiry date"
             overall_status=2
-            body=$(printf "Could not determine the domain expiry date for **esl-ui.com**.\n\nThis may indicate a change in whois output format, a monitoring failure, or a domain issue.\n\nPlease investigate.\n\n*Updated: %s*" "$(date)")
+            body=$(printf "Could not determine the domain expiry date for **$DOMAIN**.\n\nThis may indicate a change in whois output format, a monitoring failure, or a domain issue.\n\nPlease investigate.\n\n*Updated: %s*" "$(date)")
             create_or_update_issue "domain" \
-              "❌ Domain Expiry Parse Failure: esl-ui.com" \
+              "❌ Domain Expiry Parse Failure: $DOMAIN" \
               "$body" \
               "Domain Expiry Parse Failure"
           fi
