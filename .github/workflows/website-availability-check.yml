@@ -132,15 +132,13 @@ jobs:
 
               failed_list=""
               for url in "${failed_urls[@]}"; do
-                failed_list="${failed_list}- ❌ ${url}
-"
+                failed_list="${failed_list}- ❌ ${url}"$'\n'
               done
 
               success_list=""
               if [ ${#success_urls[@]} -gt 0 ]; then
                 for url in "${success_urls[@]}"; do
-                  success_list="${success_list}- ✅ ${url}
-"
+                  success_list="${success_list}- ✅ ${url}"$'\n'
                 done
               fi
 
@@ -167,15 +165,13 @@ jobs:
               # Create alert issue
               failed_list=""
               for url in "${failed_urls[@]}"; do
-                failed_list="${failed_list}- ❌ ${url}
-"
+                failed_list="${failed_list}- ❌ ${url}"$'\n'
               done
 
               success_list=""
               if [ ${#success_urls[@]} -gt 0 ]; then
                 for url in "${success_urls[@]}"; do
-                  success_list="${success_list}- ✅ ${url}
-"
+                  success_list="${success_list}- ✅ ${url}"$'\n'
                 done
               fi
 
@@ -197,15 +193,13 @@ jobs:
 
               failed_list=""
               for url in "${failed_urls[@]}"; do
-                failed_list="${failed_list}- ❌ ${url}
-"
+                failed_list="${failed_list}- ❌ ${url}"$'\n'
               done
 
               success_list=""
               if [ ${#success_urls[@]} -gt 0 ]; then
                 for url in "${success_urls[@]}"; do
-                  success_list="${success_list}- ✅ ${url}
-"
+                  success_list="${success_list}- ✅ ${url}"$'\n'
                 done
               fi
 
