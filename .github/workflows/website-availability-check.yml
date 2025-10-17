@@ -130,10 +130,16 @@ jobs:
               # Already in alert state, just update
               echo "Alert issue already exists (#$alert_issue), updating..."
 
-              failed_list=$(printf "- ❌ %s\n" "${failed_urls[@]}")
+              failed_list=""
+              for url in "${failed_urls[@]}"; do
+                failed_list="${failed_list}- ❌ ${url}\n"
+              done
+
               success_list=""
               if [ ${#success_urls[@]} -gt 0 ]; then
-                success_list=$(printf "- ✅ %s\n" "${success_urls[@]}")
+                for url in "${success_urls[@]}"; do
+                  success_list="${success_list}- ✅ ${url}\n"
+                done
               fi
 
               body=$(printf "🚨 **ALERT**: Website availability issues detected for **%s**.\n\n## Failed URLs\n%s\n" "$SITE_NAME" "$failed_list")
@@ -157,10 +163,16 @@ jobs:
               gh issue close "$warning_issue" --reason "completed" --comment "⚠️ → 🚨 This warning has been escalated to an alert due to multiple consecutive failures. A new alert issue will be created with ongoing updates."
 
               # Create alert issue
-              failed_list=$(printf "- ❌ %s\n" "${failed_urls[@]}")
+              failed_list=""
+              for url in "${failed_urls[@]}"; do
+                failed_list="${failed_list}- ❌ ${url}\n"
+              done
+
               success_list=""
               if [ ${#success_urls[@]} -gt 0 ]; then
-                success_list=$(printf "- ✅ %s\n" "${success_urls[@]}")
+                for url in "${success_urls[@]}"; do
+                  success_list="${success_list}- ✅ ${url}\n"
+                done
               fi
 
               body=$(printf "🚨 **ALERT**: Website availability issues detected for **%s**.\n\nThis alert was triggered after multiple consecutive failures.\n\n## Failed URLs\n%s\n" "$SITE_NAME" "$failed_list")
@@ -179,10 +191,16 @@ jobs:
               # First failure, create warning
               echo "First failure detected, creating WARNING issue..."
 
-              failed_list=$(printf "- ❌ %s\n" "${failed_urls[@]}")
+              failed_list=""
+              for url in "${failed_urls[@]}"; do
+                failed_list="${failed_list}- ❌ ${url}\n"
+              done
+
               success_list=""
               if [ ${#success_urls[@]} -gt 0 ]; then
-                success_list=$(printf "- ✅ %s\n" "${success_urls[@]}")
+                for url in "${success_urls[@]}"; do
+                  success_list="${success_list}- ✅ ${url}\n"
+                done
               fi
 
               body=$(printf "⚠️ **WARNING**: Potential website availability issue detected for **%s**.\n\nThis could be a temporary network issue or a deployment in progress. If the issue persists, this will be escalated to an alert.\n\n## Failed URLs\n%s\n" "$SITE_NAME" "$failed_list")
