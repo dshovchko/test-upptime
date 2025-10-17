@@ -26,8 +26,8 @@ jobs:
 
           # Configuration - change this for your domain
           DOMAIN="esl-ui.com"
-          SSL_WARNING_DAYS=430
-          DOMAIN_WARNING_DAYS=460
+          SSL_WARNING_DAYS=30
+          DOMAIN_WARNING_DAYS=60
 
           # Create labels if they don't exist
           gh label create monitoring --description "Monitoring alerts" --color "0075ca" --force 2>/dev/null || true
