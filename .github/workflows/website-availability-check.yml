@@ -19,7 +19,7 @@ jobs:
 
       - name: Check Website Availability
         run: |
-          set -uo pipefail
+          set -o pipefail
 
           # Configuration - change URLs here
           URLS=(
@@ -40,7 +40,7 @@ jobs:
             local body="$3"
             local search_term="$4"
 
-            existing_issue=$(gh issue list --label "$label" --state "open" --search "$search_term" --json number --jq '.[0].number' || echo "")
+            existing_issue=$(gh issue list --label "$label" --state "open" --search "in:title $search_term" --json number --jq '.[0].number' || echo "")
 
             if [ -z "$existing_issue" ]; then
               echo "Creating new issue with label: $label"
@@ -56,7 +56,7 @@ jobs:
             local search_term="$2"
             local comment="$3"
 
-            existing_issue=$(gh issue list --label "$label" --state "open" --search "$search_term" --json number --jq '.[0].number' || echo "")
+            existing_issue=$(gh issue list --label "$label" --state "open" --search "in:title $search_term" --json number --jq '.[0].number' || echo "")
             if [ -n "$existing_issue" ]; then
               echo "Closing resolved $label issue #$existing_issue"
               gh issue close "$existing_issue" --comment "$comment" --reason completed
@@ -67,7 +67,7 @@ jobs:
             local label="$1"
             local search_term="$2"
 
-            existing_issue=$(gh issue list --label "$label" --state "open" --search "$search_term" --json number --jq '.[0].number' || echo "")
+            existing_issue=$(gh issue list --label "$label" --state "open" --search "in:title $search_term" --json number --jq '.[0].number' || echo "")
             if [ -n "$existing_issue" ]; then
               echo "Deleting warning issue #$existing_issue (recovered before alert)"
               gh issue close "$existing_issue" --reason "not planned"
@@ -88,7 +88,7 @@ jobs:
           for url in "${URLS[@]}"; do
             echo "Checking $url..."
 
-            http_code=$(curl -L -s -o /dev/null -w "%{http_code}" --max-time 10 "$url" || echo "000")
+            http_code=$(curl -L -s -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 10 "$url" || echo "000")
 
             if [ "$http_code" = "200" ]; then
               echo "✅ $url is accessible (HTTP $http_code)"
@@ -105,7 +105,7 @@ jobs:
             echo "✅ All URLs are accessible!"
 
             # Close alert issue if exists
-            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "Website Alert" --json number --jq '.[0].number' || echo "")
+            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title Website Alert" --json number --jq '.[0].number' || echo "")
             if [ -n "$alert_issue" ]; then
               close_issue_if_exists "Monitor: Website" \
                 "Website Alert" \
@@ -121,7 +121,7 @@ jobs:
             echo "⚠️ ${#failed_urls[@]} URL(s) failed!"
 
             # Check if we already have an alert issue
-            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "Website Alert" --json number --jq '.[0].number' || echo "")
+            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title Website Alert" --json number --jq '.[0].number' || echo "")
 
             if [ -n "$alert_issue" ]; then
               # Already in alert state, just update
@@ -144,7 +144,7 @@ jobs:
             fi
 
             # Check if we have a warning issue
-            warning_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "Website Warning" --json number --jq '.[0].number' || echo "")
+            warning_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title Website Warning" --json number --jq '.[0].number' || echo "")
 
             if [ -n "$warning_issue" ]; then
               # This is the second failure, convert to alert
