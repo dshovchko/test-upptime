@@ -90,7 +90,7 @@ jobs:
           for url in "${URLS[@]}"; do
             echo "Checking $url..."
 
-            http_code=$(curl -L -s -o /dev/null -w "%{http_code}" --connect-timeout "$CONNECT_TIMEOUT" --max-time "$MAX_TIMEOUT" "$url" || echo "000")
+            http_code=$(curl -L --max-redirs 5 -s -o /dev/null -w "%{http_code}" --connect-timeout "$CONNECT_TIMEOUT" --max-time "$MAX_TIMEOUT" "$url" || echo "000")
 
             if [ "$http_code" = "200" ]; then
               echo "✅ $url is accessible (HTTP $http_code)"
@@ -107,15 +107,15 @@ jobs:
             echo "✅ All URLs are accessible!"
 
             # Close alert issue if exists
-            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title Website Alert" --json number --jq '.[0].number' || echo "")
+            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title 🚨 Website Alert" --json number --jq '.[0].number' || echo "")
             if [ -n "$alert_issue" ]; then
               close_issue_if_exists "Monitor: Website" \
-                "Website Alert" \
+                "🚨 Website Alert" \
                 "✅ Website availability has been restored. All monitored URLs are now accessible. Issue resolved."
             fi
 
             # Delete warning issue if exists (silently disappear)
-            delete_issue_if_exists "Monitor: Website" "Website Warning"
+            delete_issue_if_exists "Monitor: Website" "⚠️ Website Warning"
 
             exit 0
           else
@@ -123,7 +123,7 @@ jobs:
             echo "⚠️ ${#failed_urls[@]} URL(s) failed!"
 
             # Check if we already have an alert issue
-            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title Website Alert" --json number --jq '.[0].number' || echo "")
+            alert_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title 🚨 Website Alert" --json number --jq '.[0].number' || echo "")
 
             if [ -n "$alert_issue" ]; then
               # Already in alert state, just update
@@ -146,7 +146,7 @@ jobs:
             fi
 
             # Check if we have a warning issue
-            warning_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title Website Warning" --json number --jq '.[0].number' || echo "")
+            warning_issue=$(gh issue list --label "Monitor: Website" --state "open" --search "in:title ⚠️ Website Warning" --json number --jq '.[0].number' || echo "")
 
             if [ -n "$warning_issue" ]; then
               # This is the second failure, convert to alert
@@ -171,7 +171,7 @@ jobs:
               create_or_update_issue "Monitor: Website" \
                 "🚨 Website Alert: $SITE_NAME" \
                 "$body" \
-                "Website Alert"
+                "🚨 Website Alert"
 
               exit 1
             else
@@ -193,7 +193,7 @@ jobs:
               create_or_update_issue "Monitor: Website" \
                 "⚠️ Website Warning: $SITE_NAME" \
                 "$body" \
-                "Website Warning"
+                "⚠️ Website Warning"
 
               exit 0
             fi
