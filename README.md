@@ -23,8 +23,9 @@ Automated monitoring system for esl-ui.com infrastructure using GitHub Actions.
 
 ### Website Availability
 - **First failure** → ⚠️ Warning issue created (might be a deployment or temporary network issue)
-- **Second+ failure** → 🚨 Alert issue created (warning is closed, alert escalated)
-- **Recovery** → Alert closed with resolution, warning issue is automatically closed
+- **Second+ failure** → 🚨 Alert issue created (warning is closed with escalation comment, alert escalated)
+- **Recovery after warning** → Warning issue is silently closed (reason: "not planned")
+- **Recovery after alert** → Alert issue is closed with resolution comment (reason: "completed")
 
 ### SSL Certificate
 - Alert created when certificate expires in less than **30 days**

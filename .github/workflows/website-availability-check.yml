@@ -28,6 +28,8 @@ jobs:
             "https://esl-ui.com/bundles/site.css"
           )
           SITE_NAME="esl-ui.com"
+          CONNECT_TIMEOUT=5  # seconds to wait for connection
+          MAX_TIMEOUT=10     # seconds for total request time
 
           # Create labels if they don't exist
           gh label create monitoring --description "Monitoring alerts" --color "0075ca" --force 2>/dev/null || true
@@ -88,7 +90,7 @@ jobs:
           for url in "${URLS[@]}"; do
             echo "Checking $url..."
 
-            http_code=$(curl -L -s -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 10 "$url" || echo "000")
+            http_code=$(curl -L -s -o /dev/null -w "%{http_code}" --connect-timeout "$CONNECT_TIMEOUT" --max-time "$MAX_TIMEOUT" "$url" || echo "000")
 
             if [ "$http_code" = "200" ]; then
               echo "✅ $url is accessible (HTTP $http_code)"
@@ -150,8 +152,8 @@ jobs:
               # This is the second failure, convert to alert
               echo "Warning issue exists (#$warning_issue), converting to ALERT..."
 
-              # Close the warning issue
-              gh issue close "$warning_issue" --reason "not planned"
+              # Close the warning issue with explanation
+              gh issue close "$warning_issue" --reason "completed" --comment "⚠️ → 🚨 This warning has been escalated to an alert due to multiple consecutive failures. A new alert issue will be created with ongoing updates."
 
               # Create alert issue
               failed_list=$(printf "- ❌ %s\n" "${failed_urls[@]}")
