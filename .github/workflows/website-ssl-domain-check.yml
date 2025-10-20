@@ -25,8 +25,8 @@ jobs:
           set -uo pipefail
 
           DOMAIN="esl-ui.com"
-          SSL_WARNING_DAYS=430
-          DOMAIN_WARNING_DAYS=460
+          SSL_WARNING_DAYS=30
+          DOMAIN_WARNING_DAYS=60
           NETWORK_TIMEOUT=15  # seconds for network operations
 
           # Create labels if they don't exist
