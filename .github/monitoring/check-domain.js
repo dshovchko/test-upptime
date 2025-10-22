@@ -6,19 +6,29 @@ const WARNING_DAYS = parseInt(process.env.WARNING_DAYS || '60', 10);
 
 async function getDomainExpiry(domain) {
   const data = await whoiser(domain, {timeout: 15000});
-  const domainData = data[domain];
 
-  // Try different possible field names
-  const expiryDate = domainData['Registry Expiry Date']
-    || domainData['Expiration Date']
-    || domainData['Expiry Date']
-    || domainData['Registrar Registration Expiration Date'];
+  // whoiser returns object with whois server names as keys
+  // Iterate through all servers to find expiry date
+  const possibleFields = [
+    'Expiry Date',
+    'Registry Expiry Date',
+    'Registrar Registration Expiration Date',
+    'Expiration Date',
+    'paid-till',
+    'Expiration Time'
+  ];
 
-  if (!expiryDate) {
-    throw new Error('Could not find expiry date in whois data');
+  for (const serverData of Object.values(data)) {
+    if (!serverData || typeof serverData !== 'object') continue;
+
+    for (const field of possibleFields) {
+      if (serverData[field]) {
+        return new Date(serverData[field]);
+      }
+    }
   }
 
-  return new Date(expiryDate);
+  throw new Error('Could not find expiry date in whois data');
 }
 
 async function handleDomainExpiring(daysUntilExpiry, expiry) {
