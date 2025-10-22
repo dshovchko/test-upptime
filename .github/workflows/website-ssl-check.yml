@@ -1,4 +1,4 @@
-name: SSL Certificate Check
+name: Website SSL Certificate Check
 
 on:
   schedule:
@@ -33,5 +33,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DOMAIN: esl-ui.com
-          WARNING_DAYS: 30
+          WARNING_DAYS: 430
           TIMEOUT: 15000
