@@ -1,4 +1,4 @@
-name: Website Availability Check
+name: Website Availability Check (OLD)
 
 on:
   schedule:

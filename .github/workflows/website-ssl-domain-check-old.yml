@@ -1,4 +1,4 @@
-name: Website SSL and Domain Check
+name: Website SSL and Domain Check (Old)
 
 on:
   schedule:

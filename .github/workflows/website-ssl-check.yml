@@ -33,5 +33,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DOMAIN: esl-ui.com
-          WARNING_DAYS: 430
+          WARNING_DAYS: 30
           TIMEOUT: 15000
