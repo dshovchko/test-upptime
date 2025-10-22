@@ -3,13 +3,9 @@ import {ensureLabels, createOrUpdateIssue, closeIssue, findIssue} from './issue-
 
 const octokit = getOctokit(process.env.GITHUB_TOKEN);
 
-const URLS = [
-  'https://esl-ui.com/',
-  'https://esl-ui.com/bundles/site.js',
-  'https://esl-ui.com/bundles/site.css'
-];
-const SITE_NAME = 'esl-ui.com';
-const TIMEOUT = 10000;
+const URLS = process.env.URLS.split(',');
+const SITE_NAME = process.env.SITE_NAME;
+const TIMEOUT = parseInt(process.env.TIMEOUT || '10000', 10);
 
 async function checkURL(url) {
   console.log(`Checking ${url}...`);

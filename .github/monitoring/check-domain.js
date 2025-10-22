@@ -1,8 +1,8 @@
 import whoiser from 'whoiser';
 import {ensureLabels, createOrUpdateIssue, closeIssue} from './issue-helper.js';
 
-const DOMAIN = 'esl-ui.com';
-const WARNING_DAYS = 60;
+const DOMAIN = process.env.DOMAIN;
+const WARNING_DAYS = parseInt(process.env.WARNING_DAYS || '60', 10);
 
 async function getDomainExpiry(domain) {
   const data = await whoiser(domain, {timeout: 15000});

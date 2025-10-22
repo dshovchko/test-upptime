@@ -32,3 +32,6 @@ jobs:
         working-directory: .github/monitoring
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          URLS: https://esl-ui.com/,https://esl-ui.com/bundles/site.js,https://esl-ui.com/bundles/site.css
+          SITE_NAME: esl-ui.com
+          TIMEOUT: 10000

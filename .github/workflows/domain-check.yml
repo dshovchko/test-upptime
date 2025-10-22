@@ -32,3 +32,5 @@ jobs:
         working-directory: .github/monitoring
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          DOMAIN: esl-ui.com
+          WARNING_DAYS: 60

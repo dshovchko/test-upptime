@@ -1,9 +1,9 @@
 import tls from 'tls';
 import {ensureLabels, createOrUpdateIssue, closeIssue} from './issue-helper.js';
 
-const DOMAIN = 'esl-ui.com';
-const WARNING_DAYS = 30;
-const TIMEOUT = 15000;
+const DOMAIN = process.env.DOMAIN;
+const WARNING_DAYS = parseInt(process.env.WARNING_DAYS || '30', 10);
+const TIMEOUT = parseInt(process.env.TIMEOUT || '15000', 10);
 
 async function getSSLExpiry(domain) {
   return new Promise((resolve, reject) => {
