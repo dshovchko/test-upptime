@@ -1,0 +1,27 @@
+# IDE
+.idea
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# Libs
+node_modules
+
+# Build output
+*.tgz
+target
+
+# NPM
+.npmrc
+
+# Logs & Tmp
+npm-debug.log
+*.tmp.*
+
+# Git
+.gitconfig
+
+# Nx
+.nx/cache
+.nx/workspace-data
