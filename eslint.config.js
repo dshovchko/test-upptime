@@ -9,12 +9,6 @@ export default [
       'polyfills/**'
     ]
   },
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    linterOptions: {
-      reportUnusedDisableDirectives: 'warn'
-    }
-  },
   ...lang.js,
   ...lang.ts,
   ...strict,
