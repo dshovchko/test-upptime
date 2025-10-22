@@ -1,0 +1,13 @@
+{
+  "name": "test-uptime",
+  "version": "1.0.0",
+  "description": "Test uptime repository",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . --ext .js"
+  },
+  "devDependencies": {
+    "@exadel/eslint-config-esl": "^5.14.0",
+    "eslint": "^9.38.0"
+  }
+}
