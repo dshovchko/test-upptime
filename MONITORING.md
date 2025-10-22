@@ -39,36 +39,43 @@ Automated monitoring system for esl-ui.com infrastructure using GitHub Actions a
 
 ### Workflows
 Monitoring workflows are located in `.github/workflows/`:
-- `website-availability.yml` - Website availability checks
-- `ssl-check.yml` - SSL certificate monitoring
-- `domain-check.yml` - Domain expiration monitoring
+- `website-availability-check.yml` - Website availability checks
+- `website-ssl-check.yml` - SSL certificate monitoring
+- `website-domain-check.yml` - Domain expiration monitoring
+
+**Configuration is stored in workflow files as environment variables:**
+
+**Website Availability** (`website-availability-check.yml`):
+```yaml
+env:
+  URLS: https://esl-ui.com/,https://esl-ui.com/bundles/site.js,https://esl-ui.com/bundles/site.css
+  SITE_NAME: esl-ui.com
+  TIMEOUT: 10000
+```
+
+**SSL Certificate** (`website-ssl-check.yml`):
+```yaml
+env:
+  DOMAIN: esl-ui.com
+  WARNING_DAYS: 30
+  TIMEOUT: 15000
+```
+
+**Domain Expiration** (`website-domain-check.yml`):
+```yaml
+env:
+  DOMAIN: esl-ui.com
+  WARNING_DAYS: 60
+```
 
 ### Scripts
 Monitoring logic is implemented in JavaScript (Node.js 22) in `.github/monitoring/`:
+- `check-availability.js` - Website availability checker
+- `check-ssl.js` - SSL certificate checker
+- `check-domain.js` - Domain expiration checker
+- `issue-helper.js` - Shared GitHub issues management
 
-**Website Availability** (`check-availability.js`):
-```javascript
-const URLS = [
-  'https://esl-ui.com/',
-  'https://esl-ui.com/bundles/site.js',
-  'https://esl-ui.com/bundles/site.css'
-];
-const SITE_NAME = 'esl-ui.com';
-const TIMEOUT = 10000; // ms
-```
-
-**SSL Certificate** (`check-ssl.js`):
-```javascript
-const DOMAIN = 'esl-ui.com';
-const WARNING_DAYS = 30;
-const TIMEOUT = 15000; // ms
-```
-
-**Domain Expiration** (`check-domain.js`):
-```javascript
-const DOMAIN = 'esl-ui.com';
-const WARNING_DAYS = 60;
-```
+**Scripts read configuration from environment variables**, making them portable across projects.
 
 ### Dependencies
 Minimal dependencies in `.github/monitoring/package.json`:
@@ -108,8 +115,13 @@ All monitoring issues are tagged with:
 cd .github/monitoring
 npm install
 
-# Set GitHub token
+# Set environment variables
 export GITHUB_TOKEN=your_token
+export URLS=https://esl-ui.com/,https://esl-ui.com/bundles/site.js
+export SITE_NAME=esl-ui.com
+export DOMAIN=esl-ui.com
+export WARNING_DAYS=30
+export TIMEOUT=10000
 
 # Run checks
 node check-availability.js
