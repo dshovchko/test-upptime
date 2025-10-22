@@ -1,4 +1,4 @@
-# ESL UI Monitoring
+# ESL Website Monitoring
 
 Automated monitoring system for esl-ui.com infrastructure using GitHub Actions.
 
@@ -15,7 +15,7 @@ Automated monitoring system for esl-ui.com infrastructure using GitHub Actions.
 
 ## ⏱️ Check frequency
 
-- **Website Availability**: every 5 minutes
+- **Website Availability**: every 10 minutes
 - **SSL Certificate**: daily at 09:00 EET (07:00 UTC)
 - **Domain Expiration**: daily at 09:00 EET (07:00 UTC)
 
@@ -49,7 +49,7 @@ URLS=(
 SITE_NAME="esl-ui.com"
 ```
 
-### SSL & Domain Check (`ssl-domain-check.yml`)
+### SSL & Domain Check (`website-ssl-domain-check.yml`)
 ```yaml
 DOMAIN="esl-ui.com"
 SSL_WARNING_DAYS=30
@@ -64,22 +64,9 @@ All monitoring issues are tagged with:
 - `Monitor: SSL Certificate` - SSL certificate issues
 - `Monitor: Domain` - Domain expiration issues
 
-## 🛠️ Setup
-
-1. Fork or clone this repository
-2. Enable GitHub Actions in repository settings:
-   - Go to **Settings** → **Actions** → **General**
-   - Set Workflow permissions to **"Read and write permissions"**
-   - Click **Save**
-3. Optionally modify URLs and domains in workflow files
-4. Commit and push - monitoring starts automatically!
-
 ## 📊 How it works
 
 - Workflows run on schedule and can be triggered manually via `workflow_dispatch`
 - Issues are automatically created when problems are detected
 - Issues are automatically closed when problems are resolved
 - All checks include timestamps and detailed information
-
-<!-- start graph -->
-<!-- end graph -->

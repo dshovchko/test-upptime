@@ -2,7 +2,7 @@ name: Website Availability Check
 
 on:
   schedule:
-    - cron: "*/10 * * * *" # every 10 minutes
+    - cron: "*/20 * * * *" # every 10 minutes
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
         run: |
           set -o pipefail
 
-          # Configuration - change URLs here
+          # Configuration
           URLS=(
             "https://esl-ui.com/"
             "https://esl-ui.com/bundles/site.js"
@@ -35,7 +35,6 @@ jobs:
           gh label create monitoring --description "Monitoring alerts" --color "0075ca" --force 2>/dev/null || true
           gh label create "Monitor: Website" --description "Website availability monitoring" --color "d73a4a" --force 2>/dev/null || true
 
-          # Define reusable functions
           create_or_update_issue() {
             local label="$1"
             local title="$2"
