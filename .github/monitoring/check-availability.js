@@ -58,6 +58,33 @@ async function handleAllSuccess() {
   }
 }
 
+async function escalateWarningToAlert(warningIssue, failedList, successList) {
+  console.log(`Warning issue exists (#${warningIssue.number}), escalating to ALERT...`);
+  const body = `🚨 **ALERT**: Website availability issues detected for **${SITE_NAME}**.\n\n`
+    + '**Status escalated from warning to alert** due to multiple consecutive failures.\n\n'
+    + `## Failed URLs\n${failedList}${successList}\n\n*Escalated to alert: ${new Date().toUTCString()}*`;
+
+  await octokit.rest.issues.update({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: warningIssue.number,
+    title: `🚨 Website Alert: ${SITE_NAME}`,
+    body
+  });
+
+  const escalationComment = '⚠️ → 🚨 **Issue escalated to ALERT**\n\n'
+    + 'This warning has been escalated to an alert due to multiple consecutive failures detected.\n\n'
+    + 'The issue title and description have been updated to reflect the current alert status.';
+  await octokit.rest.issues.createComment({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: warningIssue.number,
+    body: escalationComment
+  });
+
+  process.exit(1);
+}
+
 async function handleFailures(failed, success) {
   console.log('');
   console.log(`⚠️ ${failed.length} URL(s) failed!`);
@@ -78,24 +105,8 @@ async function handleFailures(failed, success) {
 
   const warningIssue = await findIssue('Monitor: Website', '⚠️ Website Warning');
   if (warningIssue) {
-    console.log(`Warning issue exists (#${warningIssue.number}), escalating to ALERT...`);
-    const body = `🚨 **ALERT**: Website availability issues detected for **${SITE_NAME}**.\n\n`
-      + '**Status escalated from warning to alert** due to multiple consecutive failures.\n\n'
-      + `## Failed URLs\n${failedList}${successList}\n\n*Escalated to alert: ${new Date().toUTCString()}*`;
-
-    await createOrUpdateIssue('Monitor: Website', `🚨 Website Alert: ${SITE_NAME}`, body, '🚨 Website Alert');
-
-    const escalationComment = '⚠️ → 🚨 **Issue escalated to ALERT**\n\n'
-      + 'This warning has been escalated to an alert due to multiple consecutive failures detected.\n\n'
-      + 'The issue title and description have been updated to reflect the current alert status.';
-    await octokit.rest.issues.createComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: warningIssue.number,
-      body: escalationComment
-    });
-
-    process.exit(1);
+    await escalateWarningToAlert(warningIssue, failedList, successList);
+    return;
   }
 
   console.log('First failure detected, creating WARNING issue...');
