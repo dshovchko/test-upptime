@@ -1,4 +1,4 @@
-name: Domain Expiry Check
+name: Website Domain Expiry Check
 
 on:
   schedule:
@@ -33,4 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DOMAIN: esl-ui.com
-          WARNING_DAYS: 460
+          WARNING_DAYS: 60
